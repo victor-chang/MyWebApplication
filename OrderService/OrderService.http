@@ -1,0 +1,23 @@
+@OrderService_HostAddress = http://localhost:5009
+
+GET {{OrderService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+### Create Order
+POST http://localhost:5009/api/Order
+Content-Type: application/json
+
+{
+  "OrderId": 1,
+  "CustomerName": "John",
+  "ProductId": "123",
+  "Quantity": 1,
+  "Address": "Chandler, AZ"
+}
+
+### Create Order (GET)
+GET http://localhost:5009/api/Order/2
+
+### Create Order1
+GET http://localhost:5009/api/Order/CreateOrder1
