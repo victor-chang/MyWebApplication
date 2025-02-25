@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using OrderService.Models;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace OrderService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class OrderController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<OrderController> _logger;
         private readonly KafkaProducerService _kafkaProducerService;
         private readonly MyWebApplicationContext _dbConntext;
-        public OrderController(ILogger<WeatherForecastController> logger, KafkaProducerService kafkaProducerService, MyWebApplicationContext dbContext)
+        public OrderController(ILogger<OrderController> logger, KafkaProducerService kafkaProducerService, MyWebApplicationContext dbContext)
         {
             _logger = logger;
             _kafkaProducerService = kafkaProducerService;
@@ -65,14 +66,27 @@ namespace OrderService.Controllers
         [HttpGet("")]
         public async Task<IActionResult> GetOrder(int orderID)
         {
-            var o = await _dbConntext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderID);
-            if (o == null)
+
+            try
             {
-                return BadRequest("OrderId does not exist.");
+
+                var o = await _dbConntext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderID);
+                if (o == null)
+                {
+                    return NotFound("OrderId does not exist.");
+                }
+                else
+                {
+                    return Ok(o);
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(o);
+                // log error
+                _logger.LogError(ex, "Error getting order");
+                // return error message
+                return BadRequest("Something wrong");
             }
         }
 
